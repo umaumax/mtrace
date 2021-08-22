@@ -2,12 +2,12 @@
 
 mutex tracer
 
-* [*] pthread_mutex_lock
-* [*] pthread_mutex_unlock
-* [*] pthread_cond_signal
-* [*] pthread_cond_broadcast
-* [*] pthread_cond_wait
-* [*] pthread_cond_timedwait
+* [x] pthread_mutex_lock
+* [x] pthread_mutex_unlock
+* [x] pthread_cond_signal
+* [x] pthread_cond_broadcast
+* [x] pthread_cond_wait
+* [x] pthread_cond_timedwait
 * [ ] std::mutex
 
 ## how to trace
