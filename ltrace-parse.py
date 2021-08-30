@@ -94,6 +94,25 @@ def trace_unlock(addr, timestamp, pid, tid):
         }]
 
 
+def parse_line(line):
+    ret = re.search(r'<(?P<duration>[0-9]+\.[0-9]+)>', line)
+    duration = 1
+    if ret is not None:
+        # second to micro seconds
+        duration = float(ret.group("duration")) * 1000.0 * 1000.0
+    cond_addr = None
+    mutex_addr = None
+    ret = re.search(
+        r'cond=(?P<cond_addr>0x[0-9a-f]+)', line)
+    if ret is not None:
+        cond_addr = ret.group("cond_addr")
+    ret = re.search(
+        r'mutex=(?P<mutex_addr>0x[0-9a-f]+)', line)
+    if ret is not None:
+        mutex_addr = ret.group("mutex_addr")
+    return (duration, cond_addr, mutex_addr)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -127,21 +146,7 @@ def main():
                 if func_name in line:
                     name = func_name
 
-            ret = re.search(r'<(?P<duration>[0-9]+\.[0-9]+)>', line)
-            duration = 1
-            if ret is not None:
-                # second to micro seconds
-                duration = float(ret.group("duration")) * 1000.0 * 1000.0
-            cond_addr = None
-            mutex_addr = None
-            ret = re.search(
-                r'cond=(?P<cond_addr>0x[0-9a-f]+)', line)
-            if ret is not None:
-                cond_addr = ret.group("cond_addr")
-            ret = re.search(
-                r'mutex=(?P<mutex_addr>0x[0-9a-f]+)', line)
-            if ret is not None:
-                mutex_addr = ret.group("mutex_addr")
+            (duration, cond_addr, mutex_addr) = parse_line(line)
 
             if name is None:
                 continue
