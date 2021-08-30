@@ -2,6 +2,7 @@
 
 pthread_mutex tracer
 
+## trace functions progress
 * [x] pthread_mutex_lock
 * [x] pthread_mutex_unlock
 * [x] pthread_cond_signal
