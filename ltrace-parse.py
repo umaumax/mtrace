@@ -8,7 +8,7 @@ import re
 def remove_prefix(text, prefix):
     if text.startswith(prefix):
         return text[len(prefix):]
-    return text  # or whatever
+    return text
 
 
 def main():
@@ -16,13 +16,14 @@ def main():
     # parser.add_argument('-o', '--output-filepath', default='')
     parser.add_argument('-v', '--verbose', action='store_true')
     parser.add_argument('input')
-    parser.add_argument('args', nargs='*')  # any length of args is ok
+    parser.add_argument('args', nargs='*')
 
     trace_list = []
     args, extra_args = parser.parse_known_args()
     mutex_lock_dict = {}
-    pid = 1234
+    pid = 1234  # duumy value
     with open(args.input) as file:
+        # input format is ltrace output
         for line in file:
             cols = line.split()
             tid = int(cols[0])
@@ -46,6 +47,7 @@ def main():
             ret = re.search(r'<(?P<duration>[0-9]+\.[0-9]+)>', line)
             duration = 1
             if ret is not None:
+                # second to micro seconds
                 duration = float(ret.group("duration")) * 1000.0 * 1000.0
             cond_addr = None
             mutex_addr = None
