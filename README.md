@@ -1,6 +1,6 @@
 # mtrace
 
-mutex tracer
+pthread_mutex tracer
 
 * [x] pthread_mutex_lock
 * [x] pthread_mutex_unlock
