@@ -140,8 +140,16 @@ thread_local CounterManager cond_counter_manager("cond");
   }                                                          \
   ret_type func_name(__VA_ARGS__)
 
+#if __APPLE__
+#define FUNC_THROW_DECL
+#elif __linux__
+#define FUNC_THROW_DECL throw()
+#else
+#error "Non supported os"
+#endif
+
 extern "C" {
-HOOK(int, pthread_mutex_lock, pthread_mutex_t *mutex) {
+HOOK(int, pthread_mutex_lock, pthread_mutex_t *mutex) FUNC_THROW_DECL {
   std::chrono::system_clock::time_point hooked_func_start =
       std::chrono::system_clock::now();
   int ret = orig_pthread_mutex_lock(mutex);
@@ -166,7 +174,7 @@ HOOK(int, pthread_mutex_lock, pthread_mutex_t *mutex) {
   return ret;
 }
 
-HOOK(int, pthread_mutex_unlock, pthread_mutex_t *mutex) {
+HOOK(int, pthread_mutex_unlock, pthread_mutex_t *mutex) FUNC_THROW_DECL {
   std::chrono::system_clock::time_point hooked_func_start =
       std::chrono::system_clock::now();
   int ret = orig_pthread_mutex_unlock(mutex);
@@ -187,7 +195,7 @@ HOOK(int, pthread_mutex_unlock, pthread_mutex_t *mutex) {
   return ret;
 }
 
-HOOK(int, pthread_cond_signal, pthread_cond_t *cond) {
+HOOK(int, pthread_cond_signal, pthread_cond_t *cond) FUNC_THROW_DECL {
   std::chrono::system_clock::time_point hooked_func_start =
       std::chrono::system_clock::now();
   int ret = orig_pthread_cond_signal(cond);
@@ -208,7 +216,7 @@ HOOK(int, pthread_cond_signal, pthread_cond_t *cond) {
   return ret;
 }
 
-HOOK(int, pthread_cond_broadcast, pthread_cond_t *cond) {
+HOOK(int, pthread_cond_broadcast, pthread_cond_t *cond) FUNC_THROW_DECL {
   std::chrono::system_clock::time_point hooked_func_start =
       std::chrono::system_clock::now();
   int ret = orig_pthread_cond_broadcast(cond);
