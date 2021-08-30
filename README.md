@@ -22,5 +22,5 @@ ltrace -T -o ltrace.out -ttt -f -e 'pthread_mutex_lock' -e 'pthread_mutex_unlock
 
 ## how to parse
 ``` bash
-./ltrace-parse.py <(cat mtrace.out.* | sort -k 2) | jq > mtrace.json
+./ltrace-parse.py <(cat mtrace.out.* | sort -k 2) | jq . > mtrace.json
 ```
