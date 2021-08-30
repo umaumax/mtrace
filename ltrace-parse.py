@@ -12,6 +12,34 @@ def remove_prefix(text, prefix):
     return text
 
 
+def trace_func(name, addr, timestamp, duration, pid, tid):
+    return [{
+        # "name": "{}({})".format(remove_prefix(name, "pthread_mutex_"), addr),
+        "name": "{}({})".format(name, addr),
+        "cat": "{}".format(name),
+        "ph": "X",
+        "ts": timestamp,
+        "dur": duration,
+        "pid": pid,
+        "tid": tid,
+        "args": {}
+    }]
+
+
+def trace_cond(name, addr, timestamp, duration, pid, tid):
+    return [{
+        "name": "{}({})".format(remove_prefix(name, "pthread_cond_"), addr),
+        "cat": "{}".format(name),
+        "ph": "i",
+        "ts": timestamp,
+        "dur": duration,
+        "pid": pid,
+        "tid": tid,
+        "s": "g",
+        "args": {}
+    }]
+
+
 def trace_lock(addr, timestamp, pid, tid):
     return [
         # for local scope
@@ -145,23 +173,15 @@ def main():
                               "pthread_cond_timedwait", "pthread_cond_signal", "pthread_cond_broadcast"]:
                 if func_name in line:
                     name = func_name
+                    break
 
             (duration, cond_addr, mutex_addr) = parse_line(line)
 
             if name is None:
                 continue
             if name in ["pthread_cond_signal", "pthread_cond_broadcast"]:
-                trace_list += [{
-                    "name": "{}({})".format(remove_prefix(name, "pthread_cond_"), cond_addr),
-                    "cat": "{}".format(name),
-                    "ph": "i",
-                    "ts": timestamp,
-                    "dur": duration,
-                    "pid": pid,
-                    "tid": tid,
-                    "s": "g",
-                    "args": {}
-                }]
+                trace_list += trace_cond(name, cond_addr,
+                                         timestamp, duration, pid, tid)
                 continue
 
             if "unfinished" in line:
@@ -185,19 +205,12 @@ def main():
             addr = mutex_addr
             if cond_addr is not None:
                 addr = cond_addr
+            # to avoid zero duration
             if duration == 0:
                 duration = 1
-            trace_list += [{
-                # "name": "{}({})".format(remove_prefix(name, "pthread_mutex_"), addr),
-                "name": "{}({})".format(name, addr),
-                "cat": "{}".format(name),
-                "ph": "X",
-                "ts": timestamp,
-                "dur": duration,
-                "pid": pid,
-                "tid": tid,
-                "args": {}
-            }]
+
+            trace_list += trace_func(name, addr, timestamp, duration, pid, tid)
+
             addr = mutex_addr
             if name in ["pthread_mutex_unlock",
                         "pthread_cond_wait", "pthread_cond_timedwait"]:
