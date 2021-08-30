@@ -1,21 +1,17 @@
 #include <dlfcn.h>
 #include <pthread.h>
 #include <sys/syscall.h>
-#include <sys/types.h>
 #include <unistd.h>
 
 #include <cassert>
 #include <chrono>
 #include <csignal>
-#include <cstdio>
 #include <cstring>
-#include <ctime>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <map>
 #include <sstream>
-#include <string>
 
 namespace {
 void exit_handler(int sig) { std::exit(128 + sig); }
