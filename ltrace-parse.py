@@ -31,23 +31,19 @@ def main():
         # input format is ltrace output
         for line in file:
             cols = line.split()
+            if len(cols) < 2:
+                print("invalid format [{}]".format(line), file=sys.stderr)
+                return 1
             tid = int(cols[0])
+            # unit is us
             timestamp = float(cols[1]) * 1000.0 * 1000.0
             name = None
             if args.verbose:
-                print(line, end="")
-            if "pthread_mutex_lock" in line:
-                name = "pthread_mutex_lock"
-            if "pthread_mutex_unlock" in line:
-                name = "pthread_mutex_unlock"
-            if "pthread_cond_wait" in line:
-                name = "pthread_cond_wait"
-            if "pthread_cond_timedwait" in line:
-                name = "pthread_cond_timedwait"
-            if "pthread_cond_signal" in line:
-                name = "pthread_cond_signal"
-            if "pthread_cond_broadcast" in line:
-                name = "pthread_cond_broadcast"
+                print(line, end="", file=sys.stderr)
+            for func_name in ["pthread_mutex_lock", "pthread_mutex_unlock", "pthread_cond_wait",
+                              "pthread_cond_timedwait", "pthread_cond_signal", "pthread_cond_broadcast"]:
+                if func_name in line:
+                    name = func_name
 
             ret = re.search(r'<(?P<duration>[0-9]+\.[0-9]+)>', line)
             duration = 1
@@ -86,18 +82,18 @@ def main():
                 if args.verbose:
                     print(
                         "{} {} {}[start] {}".format(
-                            tid, timestamp, name, mutex_addr))
+                            tid, timestamp, name, mutex_addr), file=sys.stderr)
             elif "resumed" in line:
                 timestamp, cond_addr, mutex_addr = mutex_lock_dict[tid]
                 if args.verbose:
                     print(
                         "{} {} {}[end] {}".format(
-                            tid, timestamp, name, mutex_addr))
+                            tid, timestamp, name, mutex_addr), file=sys.stderr)
             else:
                 if args.verbose:
                     print(
                         "{} {} {}[once] {}".format(
-                            tid, timestamp, name, addr))
+                            tid, timestamp, name, addr), file=sys.stderr)
 
             addr = mutex_addr
             if cond_addr is not None:
@@ -199,6 +195,8 @@ def main():
         data = json.dumps(list(trace_list))
         f.write(data)
 
+    return 0
+
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())
