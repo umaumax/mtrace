@@ -9,7 +9,12 @@ pthread_mutex tracer
 * [x] pthread_cond_broadcast
 * [x] pthread_cond_wait
 * [x] pthread_cond_timedwait
-* [ ] std::mutex
+* [ ] pthread_rwlock_rdlock
+* [ ] pthread_rwlock_tryrdlock
+* [ ] pthread_rwlock_wrlock
+* [ ] pthread_rwlock_trywrlock
+* [ ] pthread_rwlock_unlock
+* [ ] std::mutex(lock, try_lock, unlock)
 
 ## how to trace
 ``` bash
