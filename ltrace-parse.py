@@ -12,6 +12,88 @@ def remove_prefix(text, prefix):
     return text
 
 
+def trace_lock(addr, timestamp, pid, tid):
+    return [
+        # for local scope
+        {
+            "name": "mutex {}".format(addr),
+            "cat": "locking",
+            "ph": "b",
+            "ts": timestamp,
+            "dur": 0,
+            "pid": pid,
+            "tid": tid,
+            "id": addr,
+            "args": {}
+        },
+        # for global scope
+        {
+            "name": "global mutex {}".format(addr),
+            "cat": "locking",
+            "ph": "b",
+            "ts": timestamp,
+            "dur": 0,
+            "pid": pid,
+            "tid": pid,
+            "id": "{}{}".format(pid, addr),
+            "args": {}
+        },
+        # flow event
+        # NOTE: first flow event 'f' will be ignored
+        # because it has no 's' pair
+        {
+            "name": "{}".format(addr),
+            "cat": "unlocking",
+            "ph": "f",
+            "ts": timestamp,
+            "dur": 0,
+            "pid": pid,
+            "tid": tid,
+            "id": addr,
+            "args": {}
+        }]
+
+
+def trace_unlock(addr, timestamp, pid, tid):
+    return [
+        # for local scope
+        {
+            "name": "mutex {}".format(addr),
+            "cat": "locking",
+            "ph": "e",
+            "ts": timestamp,
+            "dur": 0,
+            "pid": pid,
+            "tid": tid,
+            "id": addr,
+            "args": {}
+        },
+        # for global scope
+        {
+            "name": "global mutex {}".format(addr),
+            "cat": "locking",
+            "ph": "e",
+            "ts": timestamp,
+            "dur": 0,
+            "pid": pid,
+            "tid": pid,
+            "id": "{}{}".format(pid, addr),
+            "args": {}
+        },
+        # flow event
+        {
+            "name": "{}".format(addr),
+            "cat": "unlocking",
+            "ph": "s",
+            "ts": timestamp,
+            "dur": 0,
+            "pid": pid,
+            "tid": tid,
+            "id": addr,
+            "args": {}
+        }]
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -114,82 +196,11 @@ def main():
             addr = mutex_addr
             if name in ["pthread_mutex_unlock",
                         "pthread_cond_wait", "pthread_cond_timedwait"]:
-                # for local scope
-                trace_list += [{
-                    "name": "mutex {}".format(addr),
-                    "cat": "locking",
-                    "ph": "e",
-                    "ts": timestamp,
-                    "dur": 0,
-                    "pid": pid,
-                    "tid": tid,
-                    "id": addr,
-                    "args": {}
-                }]
-                # for global scope
-                trace_list += [{
-                    "name": "global mutex {}".format(addr),
-                    "cat": "locking",
-                    "ph": "e",
-                    "ts": timestamp,
-                    "dur": 0,
-                    "pid": pid,
-                    "tid": pid,
-                    "id": "{}{}".format(pid, addr),
-                    "args": {}
-                }]
-                # flow event
-                trace_list += [{
-                    "name": "{}".format(addr),
-                    "cat": "unlocking",
-                    "ph": "s",
-                    "ts": timestamp,
-                    "dur": 0,
-                    "pid": pid,
-                    "tid": tid,
-                    "id": addr,
-                    "args": {}
-                }]
+                trace_list += trace_unlock(addr, timestamp, pid, tid)
+            timestamp += duration
             if name in ["pthread_mutex_lock", "pthread_cond_wait",
                         "pthread_cond_timedwait"]:
-                # for local scope
-                trace_list += [{
-                    "name": "mutex {}".format(addr),
-                    "cat": "locking",
-                    "ph": "b",
-                    "ts": timestamp + duration,
-                    "dur": 0,
-                    "pid": pid,
-                    "tid": tid,
-                    "id": addr,
-                    "args": {}
-                }]
-                # for global scope
-                trace_list += [{
-                    "name": "global mutex {}".format(addr),
-                    "cat": "locking",
-                    "ph": "b",
-                    "ts": timestamp + duration,
-                    "dur": 0,
-                    "pid": pid,
-                    "tid": pid,
-                    "id": "{}{}".format(pid, addr),
-                    "args": {}
-                }]
-                # flow event
-                # NOTE: first flow event 'f' will be ignored
-                # because it has no 's' pair
-                trace_list += [{
-                    "name": "{}".format(addr),
-                    "cat": "unlocking",
-                    "ph": "f",
-                    "ts": timestamp + duration,
-                    "dur": 0,
-                    "pid": pid,
-                    "tid": tid,
-                    "id": addr,
-                    "args": {}
-                }]
+                trace_list += trace_lock(addr, timestamp, pid, tid)
 
     with args.output_filepath as f:
         data = json.dumps(list(trace_list))
