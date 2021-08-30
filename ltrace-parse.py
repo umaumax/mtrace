@@ -3,6 +3,7 @@
 import json
 import argparse
 import re
+import sys
 
 
 def remove_prefix(text, prefix):
@@ -13,7 +14,11 @@ def remove_prefix(text, prefix):
 
 def main():
     parser = argparse.ArgumentParser()
-    # parser.add_argument('-o', '--output-filepath', default='')
+    parser.add_argument(
+        '-o',
+        '--output-filepath',
+        type=argparse.FileType("w"),
+        default=sys.stdout)
     parser.add_argument('-v', '--verbose', action='store_true')
     parser.add_argument('input')
     parser.add_argument('args', nargs='*')
@@ -190,7 +195,9 @@ def main():
                     "args": {}
                 }]
 
-    print(json.dumps(list(trace_list)))
+    with args.output_filepath as f:
+        data = json.dumps(list(trace_list))
+        f.write(data)
 
 
 if __name__ == '__main__':
