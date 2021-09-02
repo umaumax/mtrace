@@ -5,6 +5,7 @@ pthread_mutex tracer
 ## trace functions progress
 * [x] pthread_mutex_lock
 * [x] pthread_mutex_unlock
+* [ ] pthread_mutex_timedlock
 * [x] pthread_cond_signal
 * [x] pthread_cond_broadcast
 * [x] pthread_cond_wait
@@ -15,6 +16,8 @@ pthread_mutex tracer
 * [ ] pthread_rwlock_trywrlock
 * [ ] pthread_rwlock_unlock
 * [ ] std::mutex(lock, try_lock, unlock)
+* [ ] std::recursive_mutex(lock, try_lock, unlock)
+* [ ] std::timed_mutex(lock, try_lock, try_lock_for, try_lock_until, unlock)
 
 ## how to trace
 ``` bash
