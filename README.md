@@ -5,6 +5,7 @@ pthread_mutex tracer
 ## trace functions progress
 * [x] pthread_mutex_lock
 * [x] pthread_mutex_unlock
+* [ ] pthread_mutex_trylock
 * [ ] pthread_mutex_timedlock
 * [x] pthread_cond_signal
 * [x] pthread_cond_broadcast
